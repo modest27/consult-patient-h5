@@ -5,3 +5,10 @@ export type User = {
   avatar: string
   token: string
 }
+
+export type CodeType =
+  | 'login'
+  | 'register'
+  | 'changeMobile'
+  | 'forgetPassword'
+  | 'bindMobile'
