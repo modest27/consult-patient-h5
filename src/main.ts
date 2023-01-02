@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import pinia from './stores'
 import App from './App.vue'
 import router from './router'
+import 'virtual:svg-icons-register'
 
 // 样式全局使用
 import 'vant/lib/index.css'
