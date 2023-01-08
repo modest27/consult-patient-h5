@@ -5,7 +5,10 @@ import type {
   DoctorPage,
   FollowType,
   TopDep,
-  Image
+  Image,
+  ConsultOrderPreParams,
+  ConsultOrderPreData,
+  PartialConsult
 } from '@/types/consult'
 import { request } from '@/utils/request'
 
@@ -30,3 +33,11 @@ export const uploadImage = (file: File) => {
   fd.append('file', file)
   return request<Image>('upload', 'POST', fd)
 }
+
+// 获取生成订单的信息
+export const getConsultOrderPre = (params: ConsultOrderPreParams) =>
+  request<ConsultOrderPreData>('patient/consult/order/pre', 'GET', params)
+
+// 生成订单
+export const createConsultOrder = (data: PartialConsult) =>
+  request<{ id: string }>('patient/consult/order', 'POST', data)
