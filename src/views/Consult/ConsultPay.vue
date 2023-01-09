@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import { createConsultOrder, getConsultOrderPre } from '@/services/consult'
+import {
+  createConsultOrder,
+  getConsultOrderPayUrl,
+  getConsultOrderPre
+} from '@/services/consult'
 import { getPatientDetail } from '@/services/user'
 import { useConsultStore } from '@/stores'
 import type { ConsultOrderPreData } from '@/types/consult'
 import type { Patient } from '@/types/user'
-import { showToast } from 'vant'
+import { showConfirmDialog, showDialog, showToast } from 'vant'
 import { onMounted, ref } from 'vue'
+import { onBeforeRouteLeave, useRouter } from 'vue-router'
 
 const store = useConsultStore()
 
@@ -31,6 +36,22 @@ const loadPatientInfo = async () => {
 }
 
 onMounted(() => {
+  // 5.刷新页面时，判断问诊记录是否存在，不存在就alert提示，确认之后回到首页
+  if (
+    !store.consult.type ||
+    !store.consult.illnessType ||
+    !store.consult.depId ||
+    !store.consult.patientId
+  ) {
+    return showDialog({
+      title: '温馨提示',
+      message:
+        '问诊信息不完整请重新填写，如有未支付的问诊订单可在问诊记录中继续支付',
+      closeOnPopstate: false
+    }).then(() => {
+      router.push('/')
+    })
+  }
   loadPayInfo()
   loadPatientInfo()
 })
@@ -40,7 +61,7 @@ const agree = ref(false)
 const show = ref(false)
 const loading = ref(false)
 const paymentMethod = ref<0 | 1>()
-const oderId = ref('')
+const orderId = ref('')
 
 const openSheet = async () => {
   if (!agree.value) return showToast('请勾选我已同意支付协议')
@@ -48,7 +69,7 @@ const openSheet = async () => {
   // 生成订单
   loading.value = true
   const res = await createConsultOrder(store.consult)
-  oderId.value = res.data.id
+  orderId.value = res.data.id
   loading.value = false
   store.clear()
 
@@ -59,7 +80,42 @@ const openSheet = async () => {
 // 进行支付
 // 1.隐藏关闭支付按钮
 // 2.再关闭抽屉时，确认框提示，仍要关闭，就跳转到订单记录，继续支付，就关闭确认框
+const router = useRouter()
+const onClose = () => {
+  return showConfirmDialog({
+    title: '关闭支付',
+    message: '取消支付将无法获得医生回复，医生接诊名额有限，是否确认关闭？',
+    cancelButtonText: '仍要关闭',
+    confirmButtonText: '继续支付'
+  })
+    .then(() => {
+      // 不想关闭
+      return false
+    })
+    .catch(() => {
+      // 关闭抽屉，跳转订单记录页
+      // 防止有orderId后，onBeforeRouteLeave会跳转拦截
+      orderId.value = ''
+      router.push('/user/consult')
+      return true
+    })
+}
 // 3.如果已经生成订单了回退时拦截
+onBeforeRouteLeave(() => {
+  // 如果生成订单了，回退时就拦截不让回退
+  if (orderId.value) return false
+})
+// 4.生成支付地址然后跳转，调后台接口
+const pay = async () => {
+  if (paymentMethod.value === undefined) return showToast('请选择支付方式')
+  showToast('跳转支付')
+  const res = await getConsultOrderPayUrl({
+    orderId: orderId.value,
+    paymentMethod: paymentMethod.value,
+    payCallback: 'http://localhost/room'
+  })
+  window.location.href = res.data.payUrl
+}
 </script>
 
 <template>
@@ -104,7 +160,13 @@ const openSheet = async () => {
       @click="openSheet"
     />
     <!-- 支付方式的抽屉 -->
-    <van-action-sheet v-model:show="show" title="选择支付方式">
+    <van-action-sheet
+      v-model:show="show"
+      title="选择支付方式"
+      :closeable="false"
+      :before-close="onClose"
+      :close-on-popstate="false"
+    >
       <div class="pay-type">
         <p class="amount">￥{{ payInfo.actualPayment.toFixed(2) }}</p>
         <van-cell-group>
@@ -122,7 +184,9 @@ const openSheet = async () => {
           </van-cell>
         </van-cell-group>
         <div class="btn">
-          <van-button type="primary" round block>立即支付</van-button>
+          <van-button type="primary" round block @click="pay"
+            >立即支付</van-button
+          >
         </div>
       </div>
     </van-action-sheet>
