@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { IllnessTime } from '@/enums'
 import { uploadImage } from '@/services/consult'
 import type { ConsultIllness, Image } from '@/types/consult'
 import { showConfirmDialog, showToast } from 'vant'
@@ -10,19 +9,9 @@ import type {
   UploaderFileListItem
 } from 'vant/lib/uploader/types'
 import { onMounted, computed, ref } from 'vue'
+import { flagOptions, timeOptions } from '@/services/constants'
 
 // 表单数据
-const timeOptions = [
-  { label: '一周内', value: IllnessTime.Week },
-  { label: '一月内', value: IllnessTime.Month },
-  { label: '半年内', value: IllnessTime.HalfYear },
-  { label: '大于半年', value: IllnessTime.More }
-]
-
-const flagOptions = [
-  { label: '就诊过', value: 0 },
-  { label: '没就诊过', value: 1 }
-]
 
 const form = ref<ConsultIllness>({
   illnessDesc: '',

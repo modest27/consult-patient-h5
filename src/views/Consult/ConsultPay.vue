@@ -112,7 +112,7 @@ const pay = async () => {
   const res = await getConsultOrderPayUrl({
     orderId: orderId.value,
     paymentMethod: paymentMethod.value,
-    payCallback: 'http://localhost/room'
+    payCallback: 'http://127.0.0.1:5173/room'
   })
   window.location.href = res.data.payUrl
 }
