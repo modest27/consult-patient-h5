@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import type { Message } from '@/types/room'
-import { MsgType } from '@/enums'
+import type { Message, Prescription } from '@/types/room'
+import { MsgType, PrescriptionStatus } from '@/enums'
 import type { IllnessTime } from '@/enums'
 import { flagOptions, timeOptions } from '@/services/constants'
-import { showImagePreview } from 'vant'
+import { showImagePreview, showToast } from 'vant'
 import type { Image } from '@/types/consult'
 import { useUserStore } from '@/stores'
 import dayjs from 'dayjs'
 import { getPrescriptionPic } from '@/services/consult'
+import { useRouter } from 'vue-router'
+import EvaluateCard from './EvaluateCard.vue'
 
 defineProps<{
   list: Message[]
@@ -50,6 +52,19 @@ const showPrescription = async (id?: string) => {
   if (id) {
     const res = await getPrescriptionPic(id)
     showImagePreview([res.data.url])
+  }
+}
+
+// 点击购买药品的跳转
+const router = useRouter()
+const buy = (pre?: Prescription) => {
+  if (pre) {
+    if (pre.status === PrescriptionStatus.Invalid)
+      return showToast('处方已失效')
+    if (pre.status === PrescriptionStatus.NotPayment && !pre.orderId) {
+      return router.push(`/order/pay?id=${pre.id}`)
+    }
+    router.push(`/order/${pre.orderId}`)
   }
 }
 </script>
@@ -186,15 +201,26 @@ const showPrescription = async (id?: string) => {
             <div class="num">x{{ med.quantity }}</div>
           </div>
         </div>
-        <div class="foot"><span>购买药品</span></div>
+        <div class="foot">
+          <span @click="buy(msg.prescription)">购买药品</span>
+        </div>
       </div>
     </div>
     <!-- 订单取消 -->
-    <!-- <div class="msg msg-tip msg-tip-cancel">
-    <div class="content">
-      <span>订单取消</span>
+    <div
+      class="msg msg-tip msg-tip-cancel"
+      v-if="msgType === MsgType.NotifyCancel"
+    >
+      <div class="content">
+        <span>{{ msg.content }}</span>
+      </div>
     </div>
-  </div> -->
+    <div
+      class="msg"
+      v-if="msgType === MsgType.CardEva || msgType === MsgType.CardEvaForm"
+    >
+      <EvaluateCard :evaluateDoc="msg.evaluateDoc"></EvaluateCard>
+    </div>
   </template>
 </template>
 

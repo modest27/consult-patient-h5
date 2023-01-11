@@ -4,7 +4,7 @@ import RoomAction from './components/RoomAction.vue'
 import RoomMessage from './components/RoomMessage.vue'
 import { io } from 'socket.io-client'
 import type { Socket } from 'socket.io-client'
-import { nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { nextTick, onMounted, onUnmounted, provide, ref } from 'vue'
 import { baseURL } from '@/utils/request'
 import { useUserStore } from '@/stores'
 import { useRoute } from 'vue-router'
@@ -180,6 +180,24 @@ const previewImage = (url?: string) => {
     startPosition: index
   })
 }
+
+// 评价
+// 1.把 未评价 和 已评价 卡片封装在一个组件
+// 2.渲染组件的时候，把消息中的评价信息，传入组件
+// 3.根据是否有评价内容，展示对应的卡片
+// 3.1有数据，展示
+// 3.2无数据，绑定表单数据，收集表单数据，提交评价
+// 3.3评价成功，修改评价消息状态和数据，切换卡片展示
+provide('consult', consult)
+const completeEva = (score: number) => {
+  // 修改评价信息，只需要添加一个数据 score
+  const item = list.value.find((item) => item.msgType === MsgType.CardEvaForm)
+  if (item) {
+    item.msg.evaluateDoc = { score }
+    item.msgType = MsgType.CardEva
+  }
+}
+provide('completeEva', completeEva)
 </script>
 
 <template>
