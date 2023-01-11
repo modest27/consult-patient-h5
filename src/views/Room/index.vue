@@ -13,13 +13,15 @@ import { MsgType, OrderType } from '@/enums'
 import type { ConsultOrderItem, Image } from '@/types/consult'
 import { getConsultOrderDetail } from '@/services/consult'
 import dayjs from 'dayjs'
-import { showToast } from 'vant'
+import { showImagePreview, showToast } from 'vant'
 
 // 1.组件挂载时建立连接，组件卸载时关闭连接
 const store = useUserStore()
 const route = useRoute()
 let socket: Socket
 const list = ref<Message[]>([])
+// 聊天记录图片预览数组
+const previewPic = ref<string[]>([])
 onMounted(() => {
   socket = io(baseURL, {
     // 身份认证
@@ -68,6 +70,10 @@ onMounted(() => {
       // 添加一个，当是下拉加载聊天记录的图片时，不需要滚动的标识
       item.items.forEach((item) => {
         arr.push({ ...item, notScroll: initialMsg.value === false })
+        // 存放图片，方便后面预览
+        if (item.msg.picture) {
+          previewPic.value.push(item.msg.picture.url)
+        }
       })
     })
     list.value.unshift(...arr)
@@ -94,6 +100,10 @@ onMounted(() => {
   // 接收消息
   socket.on('receiveChatMsg', async (msg: Message) => {
     list.value.push(msg)
+    // 存放图片，方便后面预览
+    if (msg.msg.picture) {
+      previewPic.value.push(msg.msg.picture.url)
+    }
     // 滚动到底部
     await nextTick()
     socket.emit('updateMsgStatus', msg.id)
@@ -161,6 +171,15 @@ const time = ref(dayjs().format('YYYY-MM-DD HH:mm:ss'))
 const onRefresh = () => {
   socket.emit('getChatMsgList', 20, time.value, consult.value?.id)
 }
+
+// 聊天记录图片预览
+const previewImage = (url?: string) => {
+  const index = previewPic.value.indexOf(url!)
+  showImagePreview({
+    images: previewPic.value,
+    startPosition: index
+  })
+}
 </script>
 
 <template>
@@ -171,7 +190,7 @@ const onRefresh = () => {
       :countdown="consult?.countdown"
     ></RoomStatus>
     <van-pull-refresh v-model="loading" @refresh="onRefresh">
-      <RoomMessage :list="list"></RoomMessage>
+      <RoomMessage :list="list" @preview-image="previewImage"></RoomMessage>
     </van-pull-refresh>
     <RoomAction
       @send-text="sendText"
