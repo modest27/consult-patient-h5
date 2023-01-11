@@ -66,7 +66,16 @@ const router = createRouter({
     {
       path: '/room',
       component: () => import('@/views/Room/index.vue'),
-      meta: { title: '问诊室' }
+      meta: { title: '问诊室' },
+      beforeEnter: (to) => {
+        // 进入问诊室前，判断一下是否支付失败
+        if (to.query.payResult === 'false') return '/user/consult'
+      }
+    },
+    {
+      path: '/user/consult',
+      component: () => import('@/views/User/ConsultPage.vue'),
+      meta: { title: '问诊记录' }
     }
   ]
 })

@@ -9,7 +9,9 @@ import type {
   ConsultOrderPreParams,
   ConsultOrderPreData,
   PartialConsult,
-  ConsultOrderItem
+  ConsultOrderItem,
+  ConsultOrderListParams,
+  ConsultOrderPage
 } from '@/types/consult'
 import { request } from '@/utils/request'
 
@@ -65,4 +67,12 @@ export const evaluateConsultOrder = (data: {
   score: number
   content: string
   anonymousFlag: 0 | 1
-}) => request<{ id: string }>('/patient/order/evaluate', 'POST', data)
+}) => request<{ id: string }>('patient/order/evaluate', 'POST', data)
+
+// 问诊记录分页查询
+export const getConsultOrderList = (params: ConsultOrderListParams) =>
+  request<ConsultOrderPage>('patient/consult/order/list', 'GET', params)
+
+// 取消订单
+export const cancelOrder = (id: string) =>
+  request(`/patient/order/cancel/${id}`, 'PUT')
