@@ -1,9 +1,5 @@
 <script setup lang="ts">
-import {
-  createConsultOrder,
-  getConsultOrderPayUrl,
-  getConsultOrderPre
-} from '@/services/consult'
+import { createConsultOrder, getConsultOrderPre } from '@/services/consult'
 import { getPatientDetail } from '@/services/user'
 import { useConsultStore } from '@/stores'
 import type { ConsultOrderPreData } from '@/types/consult'
@@ -60,7 +56,7 @@ onMounted(() => {
 const agree = ref(false)
 const show = ref(false)
 const loading = ref(false)
-const paymentMethod = ref<0 | 1>()
+// const paymentMethod = ref<0 | 1>()
 const orderId = ref('')
 
 const openSheet = async () => {
@@ -106,16 +102,16 @@ onBeforeRouteLeave(() => {
   if (orderId.value) return false
 })
 // 4.生成支付地址然后跳转，调后台接口
-const pay = async () => {
-  if (paymentMethod.value === undefined) return showToast('请选择支付方式')
-  showToast('跳转支付')
-  const res = await getConsultOrderPayUrl({
-    orderId: orderId.value,
-    paymentMethod: paymentMethod.value,
-    payCallback: 'http://127.0.0.1:5173/room'
-  })
-  window.location.href = res.data.payUrl
-}
+// const pay = async () => {
+//   if (paymentMethod.value === undefined) return showToast('请选择支付方式')
+//   showToast('跳转支付')
+//   const res = await getConsultOrderPayUrl({
+//     orderId: orderId.value,
+//     paymentMethod: paymentMethod.value,
+//     payCallback: 'http://127.0.0.1:5173/room'
+//   })
+//   window.location.href = res.data.payUrl
+// }
 </script>
 
 <template>
@@ -159,37 +155,13 @@ const pay = async () => {
       :loading="loading"
       @click="openSheet"
     />
-    <!-- 支付方式的抽屉 -->
-    <van-action-sheet
+    <!-- 支付抽屉组件 -->
+    <cp-pay-sheet
+      :actual-payment="payInfo.actualPayment"
+      :on-close="onClose"
+      :order-id="orderId"
       v-model:show="show"
-      title="选择支付方式"
-      :closeable="false"
-      :before-close="onClose"
-      :close-on-popstate="false"
-    >
-      <div class="pay-type">
-        <p class="amount">￥{{ payInfo.actualPayment.toFixed(2) }}</p>
-        <van-cell-group>
-          <van-cell title="微信支付" @click="paymentMethod = 0">
-            <template #icon><cp-icon name="consult-wechat" /></template>
-            <template #extra
-              ><van-checkbox :checked="paymentMethod === 0"
-            /></template>
-          </van-cell>
-          <van-cell title="支付宝支付" @click="paymentMethod = 1">
-            <template #icon><cp-icon name="consult-alipay" /></template>
-            <template #extra
-              ><van-checkbox :checked="paymentMethod === 1"
-            /></template>
-          </van-cell>
-        </van-cell-group>
-        <div class="btn">
-          <van-button type="primary" round block @click="pay"
-            >立即支付</van-button
-          >
-        </div>
-      </div>
-    </van-action-sheet>
+    ></cp-pay-sheet>
   </div>
   <div class="consult-pay-page" v-else>
     <van-skeleton title avatar :row="4" />
@@ -259,28 +231,6 @@ const pay = async () => {
   .van-submit-bar__button {
     font-weight: normal;
     width: 160px;
-  }
-}
-
-.pay-type {
-  .amount {
-    padding: 20px;
-    text-align: center;
-    font-size: 16px;
-    font-weight: bold;
-  }
-  .btn {
-    padding: 15px;
-  }
-  .van-cell {
-    align-items: center;
-    .cp-icon {
-      margin-right: 10px;
-      font-size: 18px;
-    }
-    .van-checkbox :deep(.van-checkbox__icon) {
-      font-size: 16px;
-    }
   }
 }
 </style>

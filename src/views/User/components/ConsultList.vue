@@ -29,6 +29,11 @@ const onLoad = async () => {
     finished.value = true
   }
 }
+
+// 删除该项订单信息
+const onDelete = (id: string) => {
+  list.value = list.value.filter((item) => item.id !== id)
+}
 </script>
 
 <template>
@@ -39,7 +44,12 @@ const onLoad = async () => {
       finished-text="没有更多了"
       @load="onLoad"
     >
-      <consult-item v-for="item in list" :key="item.id" :item="item" />
+      <consult-item
+        v-for="item in list"
+        :key="item.id"
+        :item="item"
+        @on-delete="onDelete"
+      />
     </van-list>
   </div>
 </template>

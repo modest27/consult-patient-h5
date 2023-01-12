@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import type { Message, Prescription } from '@/types/room'
 import { MsgType, PrescriptionStatus } from '@/enums'
-import type { IllnessTime } from '@/enums'
-import { flagOptions, timeOptions } from '@/services/constants'
 import { showImagePreview, showToast } from 'vant'
 import type { Image } from '@/types/consult'
 import { useUserStore } from '@/stores'
 import dayjs from 'dayjs'
-import { getPrescriptionPic } from '@/services/consult'
 import { useRouter } from 'vue-router'
 import EvaluateCard from './EvaluateCard.vue'
+import { useShowPrescription } from '@/composable'
+import { getConsultFlagText, getIllnessTimeText } from '@/utils/filter'
 
 defineProps<{
   list: Message[]
@@ -22,13 +21,6 @@ const emit = defineEmits<{
 const watchImg = (url?: string) => {
   emit('preview-image', url)
 }
-
-// 获取患病时间文字
-const getIllnessTimeText = (time: IllnessTime) =>
-  timeOptions.find((item) => item.value === time)?.label
-// 获取就诊人数文字
-const getConsultFlagText = (flag: 0 | 1) =>
-  flagOptions.find((item) => item.value === flag)?.label
 
 // 预览病情图片
 const previewImg = (pictures?: Image[]) => {
@@ -47,13 +39,8 @@ const loadSuccess = (notScroll?: boolean) => {
   window.scrollTo(0, document.body.scrollHeight)
 }
 
-// 查看处方原始图片
-const showPrescription = async (id?: string) => {
-  if (id) {
-    const res = await getPrescriptionPic(id)
-    showImagePreview([res.data.url])
-  }
-}
+// 查看处方
+const { showPrescription } = useShowPrescription()
 
 // 点击购买药品的跳转
 const router = useRouter()
