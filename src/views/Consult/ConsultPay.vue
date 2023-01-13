@@ -160,6 +160,7 @@ onBeforeRouteLeave(() => {
       :actual-payment="payInfo.actualPayment"
       :on-close="onClose"
       :order-id="orderId"
+      pay-callback="http://127.0.0.1:5173/room"
       v-model:show="show"
     ></cp-pay-sheet>
   </div>

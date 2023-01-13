@@ -108,7 +108,7 @@ const { deleteLoading, deleteConsultOrder } = useDeleteOrder(() =>
         plain
         size="small"
         round
-        :to="`/room/orderId=${item.id}`"
+        :to="`/room?orderId=${item.id}`"
         >继续沟通</van-button
       >
     </div>
@@ -127,7 +127,7 @@ const { deleteLoading, deleteConsultOrder } = useDeleteOrder(() =>
         plain
         size="small"
         round
-        :to="`/room/orderId=${item.id}`"
+        :to="`/room?orderId=${item.id}`"
         >继续沟通</van-button
       >
     </div>
@@ -142,7 +142,7 @@ const { deleteLoading, deleteConsultOrder } = useDeleteOrder(() =>
         plain
         size="small"
         round
-        :to="`/room/orderId=${item.id}`"
+        :to="`/room?orderId=${item.id}`"
         >问诊记录</van-button
       >
       <van-button
@@ -151,9 +151,16 @@ const { deleteLoading, deleteConsultOrder } = useDeleteOrder(() =>
         plain
         size="small"
         round
+        :to="`/room?orderId=${item.id}`"
         >写评价</van-button
       >
-      <van-button v-else class="gray" plain size="small" round
+      <van-button
+        v-else
+        class="gray"
+        plain
+        size="small"
+        round
+        :to="`/room?orderId=${item.id}`"
         >查看评价</van-button
       >
     </div>

@@ -201,6 +201,7 @@ const show = ref(false)
     <cp-pay-sheet
       :actual-payment="item.actualPayment"
       :order-id="item.id"
+      pay-callback="http://127.0.0.1:5173/room"
       v-model:show="show"
     ></cp-pay-sheet>
   </div>

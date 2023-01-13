@@ -51,7 +51,7 @@ const buy = (pre?: Prescription) => {
     if (pre.status === PrescriptionStatus.NotPayment && !pre.orderId) {
       return router.push(`/order/pay?id=${pre.id}`)
     }
-    router.push(`/order/${pre.orderId}`)
+    router.push(`/order/pay?id=${pre.orderId}`)
   }
 }
 </script>
